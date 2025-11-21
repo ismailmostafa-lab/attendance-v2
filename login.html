@@ -52,28 +52,46 @@ async function login(){
   const id = document.getElementById('userid').value.trim();
   const pass = document.getElementById('password').value.trim();
   const msg = document.getElementById('msg');
-  if(!id || !pass){ msg.style.color='red'; msg.textContent='Please fill all fields'; return; }
-  msg.style.color='#666'; msg.textContent='Checking...';
-  const payload = { action:'login', ID: id, password: pass };
-  try{
-    const r = await fetch(API, { method:'POST', body: JSON.stringify(payload) });
+
+  // Allow empty password — only ID is required
+  if (!id) {
+    msg.style.color = 'red';
+    msg.textContent = 'Please enter your ID';
+    return;
+  }
+
+  msg.style.color = '#666';
+  msg.textContent = 'Checking...';
+
+  const payload = { action: 'login', ID: id, password: pass };
+
+  try {
+    const r = await fetch(API, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
     const j = await r.json();
-    if(j.status === 'success'){
+
+    if (j.status === 'success') {
       localStorage.setItem('ID', j.ID);
       localStorage.setItem('name', j.name);
-      // small visual OK then redirect
-      msg.style.color='green'; msg.textContent='OK';
-      setTimeout(()=> location.href='attendance.html', 250);
+      msg.style.color = 'green';
+      msg.textContent = 'OK';
+      setTimeout(() => location.href = 'attendance.html', 250);
     } else {
-      msg.style.color='red'; msg.textContent='Invalid ID or Password';
+      msg.style.color = 'red';
+      msg.textContent = 'Invalid ID or Password';
     }
-  }catch(err){
-    msg.style.color='red'; msg.textContent='Connection Error';
+  } catch (err) {
+    msg.style.color = 'red';
+    msg.textContent = 'Connection Error';
   }
 }
+
 </script>
 </body>
 </html>
+
 
 
 
