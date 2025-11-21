@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Backend Tester — Debug Mode</title>
+  <style>
+    body { font-family: Arial; padding:20px; }
+    h2 { margin-top:30px; }
+    pre {
+      background:#f5f5f5;
+      padding:15px;
+      border-radius:8px;
+      white-space:pre-wrap;
+    }
+    .log {
+      background:#000;
+      color:#0f0;
+      padding:10px;
+      border-radius:6px;
+      height:200px;
+      overflow:auto;
+      font-size:14px;
+    }
+  </style>
+</head>
+
+<body>
+
+<h2>🔵 Backend Tester — Login</h2>
+
+<label>ID:</label><br>
+<input id="id" value="403"><br><br>
+
+<label>Password:</label><br>
+<input id="pass" value="1"><br><br>
+
+<button onclick="testLogin()">🚀 Test Login</button>
+
+<hr>
+
+<h2>🔵 Backend Tester — Attendance</h2>
+
+<label>Type:</label><br>
+<select id="type">
+  <option value="IN">IN</option>
+  <option value="OUT">OUT</option>
+</select><br><br>
+
+<label>Location:</label><br>
+<input id="location" value="Dokki"><br><br>
+
+<label>Latitude:</label><br>
+<input id="lat" value="30.03795"><br><br>
+
+<label>Longitude:</label><br>
+<input id="lon" value="31.20826"><br><br>
+
+<label>Accuracy:</label><br>
+<input id="acc" value="10"><br><br>
+
+<button onclick="testAttendance()">🚀 Test Attendance</button>
+
+<hr>
+
+<h2>Response:</h2>
+<pre id="output"></pre>
+
+<h2>Live Debug Log:</h2>
+<div class="log" id="debug"></div>
+
+<script>
+
+// 🔴 ضع لينك الـ Backend هنا
+const url = "https://script.google.com/macros/s/AKfycbzraUP34bYx-_aBLC_LVKkjPUZ4sfXCGgRZ8MvY1Sj3iHND1yEsbKQDoD5nhKq8hWiwAQ/exec";
+
+function log(msg) {
+    const box = document.getElementById("debug");
+    box.textContent += msg + "\n";
+    box.scrollTop = box.scrollHeight;
+}
+
+async function send(body) {
+
+    log("------------------------------------------------------");
+    log("Preparing Request...");
+    log("URL: " + url);
+    log("Body:");
+    log(JSON.stringify(body, null, 2));
+
+    let start = performance.now();
+
+    try {
+        log("Sending fetch() request...");
+
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+
+        let time = (performance.now() - start).toFixed(1);
+        log("Fetch completed in " + time + " ms");
+        log("Status: " + response.status + " " + response.statusText);
+
+        const text = await response.text();
+        log("Raw Response:");
+        log(text);
+
+        try {
+            return JSON.parse(text);
+        } catch {
+            return { raw: text };
+        }
+
+    } catch (err) {
+        let time = (performance.now() - start).toFixed(1);
+        log("❌ ERROR after " + time + " ms");
+        log("❌ " + err.message);
+
+        return {
+            error: true,
+            message: err.message,
+            note: "Fetch failed — Check CORS, URL, Deployment"
+        };
+    }
+}
+
+async function testLogin() {
+    const body = {
+        action: "login",
+        ID: document.getElementById("id").value,
+        password: document.getElementById("pass").value
+    };
+    const result = await send(body);
+    document.getElementById("output").textContent = JSON.stringify(result, null, 2);
+}
+
+async function testAttendance() {
+    const body = {
+        action: "attendance",
+        ID: document.getElementById("id").value,
+        type: document.getElementById("type").value,
+        location: document.getElementById("location").value,
+        lat: document.getElementById("lat").value,
+        lon: document.getElementById("lon").value,
+        acc: document.getElementById("acc").value
+    };
+    const result = await send(body);
+    document.getElementById("output").textContent = JSON.stringify(result, null, 2);
+}
+
+</script>
+</body>
+</html>
