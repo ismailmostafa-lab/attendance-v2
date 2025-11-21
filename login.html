@@ -45,57 +45,35 @@ html,body{height:100%;margin:0;background:var(--bg);font-family:'Cairo',sans-ser
 
 <script>
 /* Minimal optimized JS — preserves original logic and API */
-const API = "https://script.google.com/macros/s/AKfycbxpQnxfegTKfqXVPAH7iVLsDAzrsSTcb17SmXXyZj7JNbqWaJonGLlOJhSOJFnk2yY/exec";
+const API = "https://script.google.com/macros/library/d/1pOX5WxOd44_sthS1m6KOcILIV99IqOV5iMr5CsvGxVylUWxe0LjEDvvd/4";
 if(localStorage.getItem('ID')) location.href = 'attendance.html';
 
 async function login(){
   const id = document.getElementById('userid').value.trim();
   const pass = document.getElementById('password').value.trim();
   const msg = document.getElementById('msg');
-
-  // Allow empty password — only ID is required
-  if (!id) {
-    msg.style.color = 'red';
-    msg.textContent = 'Please enter your ID';
-    return;
-  }
-
-  msg.style.color = '#666';
-  msg.textContent = 'Checking...';
-
-  const payload = { action: 'login', ID: id, password: pass };
-
-  try {
-    const r = await fetch(API, {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
+  if(!id || !pass){ msg.style.color='red'; msg.textContent='Please fill all fields'; return; }
+  msg.style.color='#666'; msg.textContent='Checking...';
+  const payload = { action:'login', ID: id, password: pass };
+  try{
+    const r = await fetch(API, { method:'POST', body: JSON.stringify(payload) });
     const j = await r.json();
-
-    if (j.status === 'success') {
+    if(j.status === 'success'){
       localStorage.setItem('ID', j.ID);
       localStorage.setItem('name', j.name);
-      msg.style.color = 'green';
-      msg.textContent = 'OK';
-      setTimeout(() => location.href = 'attendance.html', 250);
+      // small visual OK then redirect
+      msg.style.color='green'; msg.textContent='OK';
+      setTimeout(()=> location.href='attendance.html', 250);
     } else {
-      msg.style.color = 'red';
-      msg.textContent = 'Invalid ID or Password';
+      msg.style.color='red'; msg.textContent='Invalid ID or Password';
     }
-  } catch (err) {
-    msg.style.color = 'red';
-    msg.textContent = 'Connection Error';
+  }catch(err){
+    msg.style.color='red'; msg.textContent='Connection Error';
   }
 }
-
 </script>
 </body>
 </html>
-
-
-
-
-
 
 
 
